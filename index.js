@@ -1,5 +1,6 @@
 import express from "express"; // библиотека для запуска сервера
 import multer from "multer"; // библиотека для запуска сервера
+import cors from "cors";       //библиотека для запуска сервера
 
 import mongoose from "mongoose";    // библиотека для работы с базой данных
 
@@ -24,6 +25,7 @@ const storage = multer.diskStorage({    //создаем хранилище
 const upload = multer({ storage });     //применяем логику stirage  на экспрес
 
 app.use(express.json());    //вызываем логику из express json который позволяет читать запросы с json
+app.use(cors());    //используем функцию cors для вызова запроса откуда угодно
 app.use('/uploads', express.static('uploads'));     //деалем проверку, если прийдет запрос на uploads то возьми функцию static на наличие передаваемой картинки
 
 app.post('/auth/login', loginValidation, handleValidationErrors, UserController.login)       //создаем запрос логинизации
