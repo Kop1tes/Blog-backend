@@ -8,7 +8,7 @@ import {loginValidation, postCreateValidation, registerValidation} from './valid
 import { handleValidationErrors, checkAuth } from './utils/index.js';       //импортируем все утилиты
 import {UserController, PostController} from './controllers/index.js'   //импортируем все контроллеры
 
-mongoose.connect('mongodb+srv://admin:cfyxjc@cluster0.0jmxa7f.mongodb.net/blog?retryWrites=true&w=majority')    //подключаем базу данных с логином admin и паролем
+mongoose.connect('mongodb+srv://admin:cfyxjc@cluster0.0jmxa7f.mongodb.net/blog?retryWrites=true&w=majority')     //подключаем базу данных с логином admin и паролем
     .then(() => { console.log("DB ok") })   //проверяем подключились ли мы к базе данных
     .catch((error) => { console.log("DB error", error) })    //если ловим ошибку то оповещаем об этом
     
@@ -38,7 +38,10 @@ app.post('/upload', checkAuth, upload.single('image'), (req, res) => {    //со
     })
 });   
 
+app.get('/tags', PostController.getLastTags);
+
 app.get('/posts', PostController.getAll);   //делаем запрос для получения всех статей
+app.get('/posts/tags', PostController.getLastTags);   //делаем запрос для получения всех тегов
 app.get('/posts/:id', PostController.getOne);   //делаем запрос  для получения одной статьи по id
 app.post('/posts', checkAuth, postCreateValidation, handleValidationErrors, PostController.create);      //делаем запрос для создания статьи
 app.delete('/posts/:id', checkAuth, PostController.remove);    //делаем запрос для удаления статьи
