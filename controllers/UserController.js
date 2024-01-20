@@ -86,7 +86,7 @@ export const login = async (req, res) => {     //добавляем логини
 
 export const getMe = async (req, res) => {    //создаем запрос для получения информации об пользователе
     try {       //делаем проверку
-        const user = await User.findById(req.userId);   //создаем переменную куда записываем пользователя найденного по id
+        const user = await UserModel.findById(req.userId);   //создаем переменную куда записываем пользователя найденного по id
         
         if (!user) {        //делаем проверку, если пользователь не найден то возвращаем ошибку с таким текстом 
             return res.status(404).json({
