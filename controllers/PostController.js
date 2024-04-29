@@ -32,59 +32,101 @@ export const getAll = async (req, res) => {     //создаем перемен�
     };
 };
 
-export const getOne = async (req, res) => {     //создаем переменную получения всех статей
-    try {
-        const postId = req.params.id;   //запсываю в переменную найденное id
+// export const getOne = async (req, res) => {     //создаем переменную получения всех статей
+//   try {
+//     const postId = req.params.id;
 
-        try {
-    const updatedDoc = await PostModel.findByIdAndUpdate(
-        postId,
-        { $inc: { viewsCount: 1 } },
-        { new: true } // Return the updated document
-    );
+//     PostModel.findOneAndUpdate(
+//       {
+//         _id: postId,
+//       },
+//       {
+//         $inc: { viewsCount: 1 },
+//       },
+//       {
+//         returnDocument: 'after',
+//       },
+//       (err, doc) => {
+//         if (err) {
+//           console.log(err);
+//           return res.status(500).json({
+//             message: 'Не удалось вернуть статью',
+//           });
+//         }
 
-    if (!updatedDoc) {
-        return res.status(404).json({
-            message: 'Статья не найдена',
-        });
+//         if (!doc) {
+//           return res.status(404).json({
+//             message: 'Статья не найдена',
+//           });
+//         }
+
+//         res.json(doc);
+//       },
+//     ).populate('user');
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({
+//       message: 'Не удалось получить статьи',
+//     });
+//   }
+// };
+
+export const getOne = async (req, res) => {
+  try {
+    const postId = req.params.id;
+
+    const updatedPost = await PostModel.findOneAndUpdate(
+      { _id: postId },
+      { $inc: { viewsCount: 1 } },
+      { returnDocument: 'after' }
+    ).populate('user');
+
+    if (!updatedPost) {
+      return res.status(404).json({
+        message: 'Статья не найдена',
+      });
     }
 
-    res.json(updatedDoc);
-} catch (error) {
-    console.error(error);
-    return res.status(500).json({
-        message: 'Не удалось вернуть статью',
+    res.json(updatedPost);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: 'Не удалось получить статью',
     });
-        }
-
-
-        
-        
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: 'Не удалось получить статью',
-        });
-    };
+  }
 };
 
-export const create = async (req, res) => {   //создаем переменную создания
-    try {
-        const doc = new PostModel({     //создаем документ
-            title: req.body.title,     //указываем что должен быть заголовок
-            text: req.body.text,     //указываем что должен быть текст
-            imageUrl: req.body.imageUrl,     //указываем что должно быть изображение
-            tags: req.body.tags,     //указываем что должны быть теги
-            user: req.userId,     //делаем проверку авторизации по id пользователя
-        });
+export const create = async (req, res) => {
+  try {
+    const doc = new PostModel({
+      title: req.body.title,
+      text: req.body.text,
+      imageUrl: req.body.imageUrl,
+      tags: req.body.tags.split(','),
+      user: req.userId,
+    });
 
-        const post = await doc.save();  //если все прошло норм то записывается документ
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: 'Не удалось создать статью',
-        });
-    };
+    const post = await doc.save();
+
+    // Добавьте логирование
+    console.log('Созданный пост:', post);
+
+    if (post._id) {
+      res.status(201).json({
+        message: 'Статья успешно создана',
+        post: post,
+      });
+    } else {
+      res.status(500).json({
+        message: 'Не удалось создать статью. Отсутствует _id в ответе сервера.',
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Не удалось создать статью',
+    });
+  }
 };
 
 export const remove = async (req, res) => {
@@ -124,7 +166,7 @@ export const update = async (req, res) => {     //создаем перемен�
                 text: req.body.text,     //указываем что должен быть текст
                 imageUrl: req.body.imageUrl,     //указываем что должно быть изображение
                 user: req.userId,     //делаем проверку авторизации по id пользователя
-                tags: req.body.tags,     //указываем что должны быть теги
+                tags: req.body.tags.split(','),     //указываем что должны быть теги
             },
         );
 
